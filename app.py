@@ -1,67 +1,96 @@
-from flask import Flask, render_template, request, jsonify
-import PyPDF2
+from flask import Flask, request, jsonify, render_template
 import os
-from transformers import pipeline
+import nltk
+import fitz  # PyMuPDF for PDF extraction
+import docx  # python-docx for DOCX extraction
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer
+from werkzeug.utils import secure_filename
+
+nltk.download('punkt')
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'uploads'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Load summarization model
-summarizer = pipeline("summarization")
+INSURANCE_KEYWORDS = {"coverage", "premium", "policyholder", "exclusions", "deductible", "endorsement", "claim", "policy term"}
+POLICY_SECTIONS = ["Coverage", "Exclusions", "Claim Process", "Premium Details", "Terms & Conditions"]
 
-UPLOAD_FOLDER = "uploads"
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+# Extract text from PDF
+def extract_text_from_pdf(pdf_path):
+    doc = fitz.open(pdf_path)
+    return "\n".join([page.get_text("text") for page in doc])
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# Extract text from DOCX
+def extract_text_from_docx(docx_path):
+    doc = docx.Document(docx_path)
+    return "\n".join([para.text for para in doc.paragraphs])
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+# Check if text contains insurance-related content
+def is_insurance_policy(text):
+    words = set(text.lower().split())
+    return any(keyword in words for keyword in INSURANCE_KEYWORDS)
 
-@app.route("/upload", methods=["POST"])
+# Extract policy sections
+def extract_policy_sections(text):
+    extracted_sections = {}
+    lines = text.split("\n")
+    current_section = None
+    
+    for line in lines:
+        line = line.strip()
+        if any(section.lower() in line.lower() for section in POLICY_SECTIONS):
+            current_section = line
+            extracted_sections[current_section] = []
+        elif current_section:
+            extracted_sections[current_section].append(line)
+    
+    return {k: " ".join(v) for k, v in extracted_sections.items()}
+
+# Summarize policy sections
+def summarize_text(text):
+    parser = PlaintextParser.from_string(text, Tokenizer("english"))
+    summarizer = LsaSummarizer()
+    summary = summarizer(parser.document, 3)
+    return " ".join(str(sentence) for sentence in summary)
+
+@app.route('/')
+def upload_form():
+    return render_template('upload.html')
+
+@app.route('/upload', methods=['POST'])
 def upload_file():
-    if "file" not in request.files:
+    if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
-    file = request.files["file"]
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
 
-    if file.filename == "":
-        return jsonify({"error": "No file selected"}), 400
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
 
-    file_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
-    file.save(file_path)
+    try:
+        if file.filename.endswith('.pdf'):
+            text = extract_text_from_pdf(filepath)
+        elif file.filename.endswith('.docx'):
+            text = extract_text_from_docx(filepath)
+        else:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                text = f.read()
+    except Exception as e:
+        return jsonify({"error": "Uploaded file is not a valid text document or contains unsupported encoding."}), 400
 
-    # Extract text from PDF
-    pdf_text = extract_text_from_pdf(file_path)
+    if not is_insurance_policy(text):
+        return jsonify({"error": "Uploaded document is not an insurance policy."}), 400
 
-    print("\nExtracted Text:\n", pdf_text)  # Debugging Step 1 ✅
+    extracted_sections = extract_policy_sections(text)
+    structured_summary = {section: summarize_text(content) for section, content in extracted_sections.items()}
+    
+    response = {"Structured Policy Summary": structured_summary}
+    return jsonify(response)
 
-    if not pdf_text.strip():
-        return jsonify({"error": "Could not extract text from PDF"}), 500
-
-    # Summarize text
-    summary = generate_summary(pdf_text)
-
-    print("\nGenerated Summary:\n", summary)  # Debugging Step 2 ✅
-
-    return jsonify({"summary": summary})
-
-def extract_text_from_pdf(file_path):
-    text = ""
-    with open(file_path, "rb") as f:
-        reader = PyPDF2.PdfReader(f)
-        for page in reader.pages:
-            text += page.extract_text() + "\n"
-
-    return text
-
-def generate_summary(text):
-    if len(text) > 1024:
-        chunks = [text[i : i + 1024] for i in range(0, len(text), 1024)]
-        summarized_chunks = [summarizer(chunk, max_length=150, min_length=50, do_sample=False)[0]["summary_text"] for chunk in chunks]
-        return " ".join(summarized_chunks)
-
-    return summarizer(text, max_length=150, min_length=50, do_sample=False)[0]["summary_text"]
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
