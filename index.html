@@ -3,104 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insurance Claim Assistant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Upload Policy Document</title>
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-8">Insurance Claim Assistant</h1>
-        
-        <!-- Policy Upload Section -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-xl font-semibold mb-4">Upload Policy</h2>
-            <input type="file" id="policyFile" class="mb-4">
-            <button onclick="uploadPolicy()" class="bg-blue-500 text-white px-4 py-2 rounded">
-                Upload Policy
-            </button>
-        </div>
-        
-        <!-- Claim Analysis Section -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold mb-4">Analyze Claim Rejection</h2>
-            <textarea 
-                id="rejectionReason" 
-                class="w-full p-2 border rounded mb-4" 
-                rows="4"
-                placeholder="Enter the reason for claim rejection..."></textarea>
-            <button onclick="analyzeClaim()" class="bg-green-500 text-white px-4 py-2 rounded">
-                Analyze Claim
-            </button>
-            
-            <!-- Results Section -->
-            <div id="results" class="mt-8 hidden">
-                <h3 class="text-lg font-semibold mb-2">Analysis Results</h3>
-                <div id="analysisResults" class="bg-gray-50 p-4 rounded mb-4"></div>
-                
-                <h3 class="text-lg font-semibold mb-2">Appeal Letter Template</h3>
-                <div id="appealLetter" class="bg-gray-50 p-4 rounded whitespace-pre-wrap"></div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function uploadPolicy() {
-            const fileInput = document.getElementById('policyFile');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('Please select a file first');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('policy', file);
-            
-            fetch('/api/upload_policy', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error uploading policy');
-            });
-        }
-        
-        function analyzeClaim() {
-            const rejectionReason = document.getElementById('rejectionReason').value;
-            
-            if (!rejectionReason) {
-                alert('Please enter the rejection reason');
-                return;
-            }
-            
-            fetch('/api/analyze', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ rejection_reason: rejectionReason })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('results').classList.remove('hidden');
-                document.getElementById('analysisResults').innerHTML = 
-                    `<strong>Status:</strong> ${data.analysis.status}<br>
-                     <strong>Reason:</strong> ${data.analysis.reason}<br>
-                     <strong>Recommendation:</strong> ${data.analysis.recommendation}<br>
-                     <strong>Next Steps:</strong><br>
-                     ${data.analysis.next_steps.map(step => `• ${step}`).join('<br>')}`;
-                
-                document.getElementById('appealLetter').textContent = data.appeal_letter;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error analyzing claim');
-            });
-        }
-    </script>
+<body>
+    <h2>Upload a Policy Document</h2>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Upload & Summarize</button>
+    </form>
 </body>
 </html>
