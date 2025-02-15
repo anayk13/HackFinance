@@ -3,13 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Policy Document</title>
+    <title>Upload Insurance Policy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden {
+            display: none;
+        }
+        .drag-over {
+            border: 2px dashed #4CAF50 !important;
+        }
+    </style>
 </head>
-<body>
-    <h2>Upload a Policy Document</h2>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required>
-        <button type="submit">Upload & Summarize</button>
-    </form>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full text-center">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">📄 Upload Your Insurance Policy</h2>
+        <p class="text-gray-600 mb-6">Upload a <strong>PDF</strong> or <strong>DOCX</strong> file to extract and summarize key policy details.</p>
+
+        <!-- Drag & Drop Area -->
+        <div id="drop-area" class="border-2 border-dashed border-gray-300 p-6 rounded-lg cursor-pointer hover:border-green-500 transition">
+            <p class="text-gray-500">Drag & drop your file here or click to browse</p>
+            <input type="file" id="file-input" class="hidden" accept=".pdf,.docx">
+        </div>
+
+        <!-- File Preview -->
+        <div id="file-preview" class="mt-4 hidden">
+            <p class="text-green-600 font-semibold">✅ File Selected:</p>
+            <p id="file-name" class="text-gray-700"></p>
+        </div>
+
+        <!-- Upload Button -->
+        <button id="upload-btn" class="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50" disabled>
+            📤 Upload & Analyze
+        </button>
+
+        <!-- Loading Animation -->
+        <div id="loading" class="hidden mt-4">
+            <div class="flex items-center justify-center">
+                <svg class="animate-spin h-6 w-6 text-blue-500" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0L12 4 16 0V4a8 8 0 01-8 8z"></path>
+                </svg>
+            </div>
+            <p class="text-gray-600 mt-2">Analyzing your document...</p>
+        </div>
+
+        <!-- Error Message -->
+        <p id="error-message" class="text-red-500 mt-2 hidden"></p>
+
+        <!-- Form Submission -->
+        <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data" class="hidden">
+            <input type="file" name="file" id="hidden-file">
+        </form>
+    </div>
+
+    <script>
+        const dropArea = document.getElementById("drop-area");
+        const fileInput = document.getElementById("file-input");
+        const uploadBtn = document.getElementById("upload-btn");
+        const filePreview = document.getElementById("file-preview");
+        const fileNameDisplay = document.getElementById("file-name");
+        const errorMessage = document.getElementById("error-message");
+        const loading = document.getElementById("loading");
+        const uploadForm = document.getElementById("upload-form");
+        const hiddenFileInput = document.getElementById("hidden-file");
+
+        dropArea.addEventListener("click", () => fileInput.click());
+
+        fileInput.addEventListener("change", handleFileSelect);
+        dropArea.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            dropArea.classList.add("drag-over");
+        });
+
+        dropArea.addEventListener("dragleave", () => dropArea.classList.remove("drag-over"));
+
+        dropArea.addEventListener("drop", (event) => {
+            event.preventDefault();
+            dropArea.classList.remove("drag-over");
+
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (file) {
+                if (!["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type)) {
+                    errorMessage.textContent = "⚠️ Please upload a valid PDF or DOCX file.";
+                    errorMessage.classList.remove("hidden");
+                    return;
+                }
+                errorMessage.classList.add("hidden");
+                filePreview.classList.remove("hidden");
+                fileNameDisplay.textContent = file.name;
+                uploadBtn.disabled = false;
+            }
+        }
+
+        uploadBtn.addEventListener("click", () => {
+            hiddenFileInput.files = fileInput.files;
+            loading.classList.remove("hidden");
+            uploadForm.submit();
+        });
+    </script>
+
 </body>
 </html>
