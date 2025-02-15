@@ -3,32 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Summary Result</title>
+    <title>Insurance Policy Summary</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
+            background-color: #f8f9fa;
+            margin: 20px;
         }
-        .summary-box {
-            width: 80%;
-            margin: auto;
+        .container {
+            max-width: 800px;
+            background: white;
             padding: 20px;
-            border: 1px solid #ccc;
-            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #007bff;
+        }
+        .section {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+        .section h3 {
+            color: #333;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .warning {
+            color: red;
+            font-weight: bold;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 5px;
         }
     </style>
 </head>
 <body>
 
-    <h1>Insurance Policy Summary</h1>
-    
-    <div class="summary-box">
-        <p>{{ summary }}</p>
-    </div>
+    <div class="container">
+        <h2>🚀 Insurance Policy Summary</h2>
 
-    <br>
-    <a href="/">Upload Another File</a>
+        {% for section, content in summary.items() %}
+        <div class="section">
+            <h3>📌 {{ section }}</h3>
+            <p>{{ content }}</p>
+        </div>
+        {% endfor %}
+
+        <div class="section">
+            <h3>⚠️ Hidden Clauses & Legal Risks</h3>
+            <ul>
+                <li class="warning">⚠️ Waiting Period: Some treatments require a waiting period before coverage starts.</li>
+                <li class="warning">⚠️ Premium Increases: The provider may raise premiums after multiple claims.</li>
+                <li class="warning">⚠️ Policy Lapse: If renewal is missed, all benefits reset.</li>
+                <li class="warning">⚠️ Room Rent Capping: Additional charges may apply if room rent exceeds policy limit.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h3>📢 Final Takeaway</h3>
+            <ul>
+                <li class="highlight">✅ Great for hospitalization & major treatments</li>
+                <li class="warning">🚫 Not ideal if you need frequent OPD visits</li>
+                <li>📌 Always read the fine print before purchasing</li>
+            </ul>
+        </div>
+
+    </div>
 
 </body>
 </html>
