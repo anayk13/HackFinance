@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insurance Claim Analysis</title>
+    <title>Insurance Policy Analyzer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .hidden { display: none; }
@@ -12,229 +12,149 @@
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <!-- Main Container -->
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Insurance Claim Analysis</h1>
-        
-        <!-- Document Upload Section -->
-        <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            <!-- Policy Document Upload -->
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">📄 Insurance Policy</h2>
-                <div id="policy-drop-area" class="border-2 border-dashed border-gray-300 p-6 rounded-lg cursor-pointer hover:border-blue-500 transition mb-4">
-                    <p class="text-gray-500 text-center">Drop your insurance policy document here<br>or click to browse</p>
-                    <input type="file" id="policy-input" class="hidden" accept=".pdf,.docx">
-                </div>
-                <div id="policy-preview" class="hidden">
-                    <p class="text-green-600 font-semibold">✅ Policy Document:</p>
-                    <p id="policy-name" class="text-gray-700"></p>
-                </div>
+    <!-- Upload Section -->
+    <div id="upload-container" class="container mx-auto px-4 py-8">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl mx-auto text-center">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">📄 Insurance Policy Analyzer</h2>
+            <p class="text-gray-600 mb-6">Upload your insurance policy document to get a comprehensive analysis</p>
+
+            <div id="drop-area" class="border-2 border-dashed border-gray-300 p-6 rounded-lg cursor-pointer hover:border-green-500 transition">
+                <p class="text-gray-500">Drag & drop your file here or click to browse</p>
+                <input type="file" id="file-input" class="hidden" accept=".pdf,.docx">
             </div>
 
-            <!-- Claim Rejection Letter Upload -->
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">📝 Claim Rejection Letter</h2>
-                <div id="claim-drop-area" class="border-2 border-dashed border-gray-300 p-6 rounded-lg cursor-pointer hover:border-blue-500 transition mb-4">
-                    <p class="text-gray-500 text-center">Drop your claim rejection letter here<br>or click to browse</p>
-                    <input type="file" id="claim-input" class="hidden" accept=".pdf,.docx">
-                </div>
-                <div id="claim-preview" class="hidden">
-                    <p class="text-green-600 font-semibold">✅ Claim Letter:</p>
-                    <p id="claim-name" class="text-gray-700"></p>
-                </div>
+            <div id="file-preview" class="mt-4 hidden">
+                <p class="text-green-600 font-semibold">✅ File Selected:</p>
+                <p id="file-name" class="text-gray-700"></p>
             </div>
-        </div>
 
-        <!-- Analysis Button -->
-        <div class="text-center mt-8">
-            <button id="analyze-btn" class="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                🔍 Analyze Documents
+            <button id="upload-btn" class="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50" disabled>
+                📤 Upload & Analyze
             </button>
-        </div>
 
-        <!-- Loading State -->
-        <div id="loading" class="hidden mt-8 text-center">
-            <div class="flex items-center justify-center">
-                <svg class="animate-spin h-8 w-8 text-blue-500" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0L12 4 16 0V4a8 8 0 01-8 8z"></path>
-                </svg>
+            <div id="loading" class="hidden mt-4">
+                <div class="flex items-center justify-center">
+                    <svg class="animate-spin h-6 w-6 text-blue-500" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0L12 4 16 0V4a8 8 0 01-8 8z"></path>
+                    </svg>
+                </div>
+                <p class="text-gray-600 mt-2">Analyzing your document...</p>
             </div>
-            <p class="text-gray-600 mt-2">Analyzing documents using NLP...</p>
-        </div>
 
-        <!-- Analysis Results -->
-        <div id="analysis-results" class="hidden mt-8 max-w-4xl mx-auto">
-            <div class="bg-white p-8 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Analysis Results</h2>
-
-                <!-- Summary Card -->
-                <div id="summary-card" class="mb-8 p-4 rounded-lg border border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-800 mb-2">Summary</h3>
-                    <p id="summary-text" class="text-gray-600"></p>
-                </div>
-
-                <!-- Discrepancies -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-medium text-gray-800 mb-4">Identified Discrepancies</h3>
-                    <div id="discrepancies-list" class="space-y-4"></div>
-                </div>
-
-                <!-- Policy References -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-medium text-gray-800 mb-4">Relevant Policy Sections</h3>
-                    <div id="policy-references" class="space-y-4"></div>
-                </div>
-
-                <!-- Appeal Section -->
-                <div id="appeal-section" class="hidden">
-                    <h3 class="text-lg font-medium text-gray-800 mb-4">Generated Appeal Letter</h3>
-                    <div id="appeal-letter" class="bg-gray-50 p-6 rounded-lg whitespace-pre-wrap font-mono text-sm"></div>
-                    <button onclick="downloadAppealLetter()" class="mt-4 bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition">
-                        📥 Download Appeal Letter
-                    </button>
-                </div>
-            </div>
+            <p id="error-message" class="text-red-500 mt-2 hidden"></p>
+            <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data" class="hidden">
+                <input type="file" name="file" id="hidden-file">
+            </form>
         </div>
     </div>
 
+    <!-- Results Section -->
+    {% if summaries %}
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-6 text-center">Policy Analysis Results</h2>
+            
+            <!-- Navigation Menu -->
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button onclick="showSection('all')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Complete Summary
+                </button>
+                {% for section in summaries %}
+                <button onclick="showSection('{{ section }}')" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                    {{ section|title }}
+                </button>
+                {% endfor %}
+            </div>
+
+            <!-- Content Sections -->
+            {% for section, points in summaries.items() %}
+            <div id="{{ section }}-section" class="section-content hidden">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">{{ section|title }} Summary</h3>
+                <ul class="list-disc pl-6 space-y-2">
+                    {% for point in points %}
+                    <li class="text-gray-700">{{ point }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <script>
-        // File Upload Handling
-        function setupFileUpload(dropAreaId, inputId, previewId, nameId) {
-            const dropArea = document.getElementById(dropAreaId);
-            const fileInput = document.getElementById(inputId);
-            const preview = document.getElementById(previewId);
-            const nameElement = document.getElementById(nameId);
+        // File upload handling
+        const dropArea = document.getElementById("drop-area");
+        const fileInput = document.getElementById("file-input");
+        const uploadBtn = document.getElementById("upload-btn");
+        const filePreview = document.getElementById("file-preview");
+        const fileNameDisplay = document.getElementById("file-name");
+        const errorMessage = document.getElementById("error-message");
+        const loading = document.getElementById("loading");
+        const uploadForm = document.getElementById("upload-form");
+        const hiddenFileInput = document.getElementById("hidden-file");
 
-            dropArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropArea.classList.add('drag-over');
-            });
+        dropArea.addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", handleFileSelect);
+        
+        dropArea.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            dropArea.classList.add("drag-over");
+        });
 
-            dropArea.addEventListener('dragleave', () => {
-                dropArea.classList.remove('drag-over');
-            });
+        dropArea.addEventListener("dragleave", () => {
+            dropArea.classList.remove("drag-over");
+        });
 
-            dropArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropArea.classList.remove('drag-over');
-                handleFile(e.dataTransfer.files[0], preview, nameElement);
-            });
-
-            dropArea.addEventListener('click', () => {
-                fileInput.click();
-            });
-
-            fileInput.addEventListener('change', (e) => {
-                handleFile(e.target.files[0], preview, nameElement);
-            });
-        }
-
-        function handleFile(file, preview, nameElement) {
-            if (file) {
-                nameElement.textContent = file.name;
-                preview.classList.remove('hidden');
-                checkAnalyzeButton();
-            }
-        }
-
-        function checkAnalyzeButton() {
-            const policyPreview = document.getElementById('policy-preview');
-            const claimPreview = document.getElementById('claim-preview');
-            const analyzeBtn = document.getElementById('analyze-btn');
-            
-            analyzeBtn.disabled = policyPreview.classList.contains('hidden') || 
-                                claimPreview.classList.contains('hidden');
-        }
-
-        // Initialize file upload handlers
-        setupFileUpload('policy-drop-area', 'policy-input', 'policy-preview', 'policy-name');
-        setupFileUpload('claim-drop-area', 'claim-input', 'claim-preview', 'claim-name');
-
-        // Analysis Handler
-        document.getElementById('analyze-btn').addEventListener('click', async () => {
-            const loading = document.getElementById('loading');
-            const results = document.getElementById('analysis-results');
-            
-            loading.classList.remove('hidden');
-            results.classList.add('hidden');
-
-            // Create FormData with both files
-            const formData = new FormData();
-            formData.append('policy', document.getElementById('policy-input').files[0]);
-            formData.append('claim', document.getElementById('claim-input').files[0]);
-
-            try {
-                const response = await fetch('/analyze_documents', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-                displayResults(data);
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred during analysis. Please try again.');
-            } finally {
-                loading.classList.add('hidden');
+        dropArea.addEventListener("drop", (event) => {
+            event.preventDefault();
+            dropArea.classList.remove("drag-over");
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
             }
         });
 
-        function displayResults(data) {
-            const results = document.getElementById('analysis-results');
-            results.classList.remove('hidden');
-
-            // Update summary
-            document.getElementById('summary-text').textContent = data.summary;
-
-            // Update discrepancies
-            const discrepanciesList = document.getElementById('discrepancies-list');
-            discrepanciesList.innerHTML = '';
-            data.discrepancies.forEach(disc => {
-                const div = document.createElement('div');
-                div.className = 'p-4 bg-red-50 rounded-lg';
-                div.innerHTML = `
-                    <h4 class="font-medium text-red-800 mb-2">Discrepancy Found:</h4>
-                    <p class="text-red-600">${disc}</p>
-                `;
-                discrepanciesList.appendChild(div);
-            });
-
-            // Update policy references
-            const referencesDiv = document.getElementById('policy-references');
-            referencesDiv.innerHTML = '';
-            data.policy_references.forEach(ref => {
-                const div = document.createElement('div');
-                div.className = 'p-4 bg-blue-50 rounded-lg';
-                div.innerHTML = `
-                    <h4 class="font-medium text-blue-800 mb-2">Policy Reference:</h4>
-                    <p class="text-blue-600">${ref}</p>
-                `;
-                referencesDiv.appendChild(div);
-            });
-
-            // Show/hide appeal section
-            const appealSection = document.getElementById('appeal-section');
-            if (data.appeal_letter) {
-                appealSection.classList.remove('hidden');
-                document.getElementById('appeal-letter').textContent = data.appeal_letter;
-            } else {
-                appealSection.classList.add('hidden');
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (file) {
+                if (!["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type)) {
+                    errorMessage.textContent = "⚠️ Please upload a valid PDF or DOCX file.";
+                    errorMessage.classList.remove("hidden");
+                    return;
+                }
+                errorMessage.classList.add("hidden");
+                filePreview.classList.remove("hidden");
+                fileNameDisplay.textContent = file.name;
+                uploadBtn.disabled = false;
             }
         }
 
-        function downloadAppealLetter() {
-            const letterContent = document.getElementById('appeal-letter').textContent;
-            const blob = new Blob([letterContent], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'appeal-letter.txt';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+        uploadBtn.addEventListener("click", () => {
+            hiddenFileInput.files = fileInput.files;
+            loading.classList.remove("hidden");
+            uploadForm.submit();
+        });
+
+        // Results section handling
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section-content');
+            sections.forEach(section => {
+                if (sectionId === 'all' || section.id === `${sectionId}-section`) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
         }
+
+        // Show complete summary by default if results are present
+        {% if summaries %}
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('all');
+        });
+        {% endif %}
     </script>
 </body>
 </html>

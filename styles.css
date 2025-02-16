@@ -1,0 +1,159 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+header {
+    background-color: #007BFF;
+    padding: 20px 0;
+    color: white;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: 500;
+}
+
+.nav a:hover {
+    text-decoration: underline;
+}
+
+.hero {
+    background: #007BFF;
+    color: white;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.hero h2 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.cta-button {
+    background-color: #28a745;
+    color: white;
+    padding: 15px 25px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    font-weight: 600;
+}
+
+.cta-button:hover {
+    background-color: #218838;
+}
+
+section {
+    padding: 40px 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+footer {
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.upload input[type="file"] {
+    margin-bottom: 20px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.upload button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.upload button:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    .hero h2 {
+        font-size: 28px;
+    }
+
+    .cta-button {
+        padding: 12px 20px;
+        font-size: 18px;
+    }
+    
+    header .container {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+.cta-button {
+    background-color: #28a745;
+    color: white;
+    padding: 15px 25px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.cta-button:hover {
+    background-color: #218838;
+}
+
+.cta-button {
+    background-color: #28a745;
+    color: white;
+    padding: 15px 25px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.cta-button:hover {
+    background-color: #218838;
+}
+
+/* Style for Claim Rejection Button */
+.claim-rejection {
+    background-color: #ffc107; /* Yellow color */
+    margin-top: 20px;
+}
+
+.claim-rejection:hover {
+    background-color: #e0a800;
+}
+
