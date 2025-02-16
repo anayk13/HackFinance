@@ -3,81 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insurance Policy Summary</title>
+    <title>Policy Analysis Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            margin: 20px;
-        }
-        .container {
-            max-width: 800px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-            color: #007bff;
-        }
-        .section {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f1f1f1;
-            border-radius: 5px;
-        }
-        .section h3 {
-            color: #333;
-        }
-        .highlight {
-            font-weight: bold;
-            color: #28a745;
-        }
-        .warning {
-            color: red;
-            font-weight: bold;
-        }
-        ul {
-            padding-left: 20px;
-        }
-        li {
-            margin-bottom: 5px;
-        }
+        .section-content { transition: all 0.3s ease-in-out; }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="container mx-auto px-4">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold mb-6 text-center">Policy Analysis Results</h2>
+            
+            <!-- Navigation Menu -->
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button onclick="showSection('all')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Complete Summary
+                </button>
+                {% for section in summaries.keys() %}
+                <button onclick="showSection('{{ section }}')" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                    {{ section|title }}
+                </button>
+                {% endfor %}
+            </div>
 
-    <div class="container">
-        <h2>🚀 Insurance Policy Summary</h2>
+            <!-- Content Sections -->
+            {% for section, points in summaries.items() %}
+            <div id="{{ section }}-section" class="section-content hidden">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">{{ section|title }} Summary</h3>
+                {% if points %}
+                <ul class="list-disc pl-6 space-y-2">
+                    {% for point in points %}
+                    <li class="text-gray-700">{{ point }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-gray-600">No information found for this section.</p>
+                {% endif %}
+            </div>
+            {% endfor %}
 
-        {% for section, content in summary.items() %}
-        <div class="section">
-            <h3>📌 {{ section }}</h3>
-            <p>{{ content }}</p>
+            <!-- Back Button -->
+            <div class="mt-8 text-center">
+                <a href="/" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+                    Upload Another Document
+                </a>
+            </div>
         </div>
-        {% endfor %}
-
-        <div class="section">
-            <h3>⚠️ Hidden Clauses & Legal Risks</h3>
-            <ul>
-                <li class="warning">⚠️ Waiting Period: Some treatments require a waiting period before coverage starts.</li>
-                <li class="warning">⚠️ Premium Increases: The provider may raise premiums after multiple claims.</li>
-                <li class="warning">⚠️ Policy Lapse: If renewal is missed, all benefits reset.</li>
-                <li class="warning">⚠️ Room Rent Capping: Additional charges may apply if room rent exceeds policy limit.</li>
-            </ul>
-        </div>
-
-        <div class="section">
-            <h3>📢 Final Takeaway</h3>
-            <ul>
-                <li class="highlight">✅ Great for hospitalization & major treatments</li>
-                <li class="warning">🚫 Not ideal if you need frequent OPD visits</li>
-                <li>📌 Always read the fine print before purchasing</li>
-            </ul>
-        </div>
-
     </div>
 
+    <script>
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section-content');
+            sections.forEach(section => {
+                if (sectionId === 'all' || section.id === `${sectionId}-section`) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+        }
+
+        // Show complete summary by default
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('all');
+        });
+    </script>
 </body>
 </html>
